@@ -17,6 +17,9 @@ use 5.010;
 use strict;
 use warnings;
 use diagnostics;
+use DDP;
+use feature qw(switch say state);
+
 BEGIN{
 	if ($] < 5.018) {
 		package experimental;
@@ -28,10 +31,55 @@ no warnings 'experimental';
 sub tokenize {
 	chomp(my $expr = shift);
 	my @res;
-
-	# ...
+	my $num = 0;
+	my $oper    = 1;
+	my $unar  = 0;
+	my @source = split m{((?<!e)[-+]|[()/*^]|\s+)}, $expr;
+    p @source;
+	for (@source) {
+		given ($_) {
+			when (/\d/) {
+				die "Sequence of numbers" if $num++;
+				undef $oper;
+				undef $unar;
+				if (/^(\d+(\.\d*)?|\.\d+)([eE][+-]?\d*)?$/) {
+					push @res, 0+$_;
+				} else {
+					die "Incorrect number: $_";
+				}
+			}
+			when (/^\s*$/) {}
+			when ('(') {
+				die "$_ in incorrect place" unless $oper;
+				push @res, $_;
+			}
+			when (')') {
+				die "$_ after operator" if $oper or $unar;
+				push @res, $_;
+			}
+			when (['-','+']) {
+				if ($num) {
+					continue;
+				} else {
+					$unar = 1;
+					push @res, "U$_";
+				}
+			}
+			when (m{[-+*/^]}) {
+				die "Several ops" if $oper++;
+				undef $num;
+				push @res, $_;
+			}
+			default {
+				die "Bad symbol '$_'";
+			}
+		}
+	}
+	die "No number after unary" if $unar;
+	die "No number after operator" if $oper;
 
 	return \@res;
+
 }
 
 1;
