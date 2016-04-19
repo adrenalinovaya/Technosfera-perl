@@ -17,7 +17,6 @@ use 5.010;
 use strict;
 use warnings;
 use diagnostics;
-use DDP;
 use feature qw(switch say state);
 
 BEGIN{
@@ -35,7 +34,6 @@ sub tokenize {
 	my $oper    = 1;
 	my $unar  = 0;
 	my @source = split m{((?<!e)[-+]|[()/*^]|\s+)}, $expr;
-    p @source;
 	for (@source) {
 		given ($_) {
 			when (/\d/) {
