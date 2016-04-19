@@ -12,7 +12,6 @@ use strict;
 use warnings;
 use diagnostics;
 use feature qw(switch say state);
-use DDP;
 BEGIN{
 	if ($] < 5.018) {
 		package experimental;
@@ -59,7 +58,6 @@ sub rpn {
 	my $source = tokenize($exp);
 	push @$source, ".";
 
-	p $source;
 	my $nums = 0;
 	my $ops = 0;
 
